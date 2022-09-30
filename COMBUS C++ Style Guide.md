@@ -3,10 +3,10 @@
 
 ## C++ Version and Compilation
 
-* The following guide has been created to provide a useful navigational tool for developing concise, readable, reproducible and - most importantly - safe and bug-prone code. Almost all issues of model output encountered over the last 5 years of COMBUS C++ development can be *directly* attributed to simple bugs, derived from notation and obscure data type declarations. Instances where incorrect COMBUS model outputs were caused by mathematical design faults have been the exception to this rule. 
+* The following guide has been created to provide a useful navigational tool for developing concise, readable, reproducible and - most importantly - safe and bug-prone code. Almost all issues of COMBUS model outputs encountered over the last 5 years of C++ (and VBA, python, bash, etc.) development can be *directly* attributed to simple bugs, derived from notation and obscure data type declarations. Instances where incorrect COMBUS model outputs were caused by mathematical design faults have been the exception to this rule. 
 An effort should be made by COMBUS programmers to follow the following paradigms, even if implementation is notably more time consuming
 
-*  COMBUS C++ programming is done through Visual Studio 2022 (pending further releases). All newly made projects should be created via the COMBUS C++ template (preloaded on all current COMBUS development computers). For new systems, located the template found in "**R:/COMBUS C++ Project.zip**" and copy into the Visual Studio template folder
+*  COMBUS C++ programming is done through Visual Studio 2022 (pending further releases). All newly made projects should be created via the COMBUS C++ template (preloaded on all current COMBUS development computers). For new systems, locate the template found in "**R:/COMBUS C++ Project.zip**" and copy into the Visual Studio template folder
 
 * The COMBUS C++ template is setup to use the C++20 standard with the following noteworthy compilation options:
 	* -Werror enabled for release mode, disabled for debug mode
@@ -16,15 +16,16 @@ An effort should be made by COMBUS programmers to follow the following paradigms
 
 * **-Werror should be on at all times**
 
+* Google ABSL libraries are temporarily disabled pending the release of an ABSL libary compatible with C++17/20 
+
 * Much of this standard is derived from the Google C++ style guide; some rules deemed critical are copied verbatum.  If a programming style paradigm is absent from this guide, search in https://google.github.io/styleguide/cppguide.html
 
 
 ## Storing Data
 
 ### Local Variables
-
 Place function's variables in the narrowest scope possible. Avoid as much as possible initialisations separate from declarations:
-```c++
+```cpp
 int i;
 i = f(); //BAD
 
@@ -38,7 +39,7 @@ auto v2 = std::vector<int>({1,2}); //GOOD and prefer list initialisation
 ```
 
 A notable exception to this is where a constructor is invoked repeatedly each time it enters scope where it is more efficient to separate the declaration. In these cases consider wrapping the code in a scope brace `{...}`
-```c++
+```cpp
 // Inefficient implementation:
 for (int i = 0; i < 1000000; ++i) {
   Foo f;  // My ctor and dtor get called 1000000 times each.
@@ -57,9 +58,8 @@ for (int i = 0; i < 1000000; ++i) {
 
 
 ### Fundamental Types
-
 * All fundamental types - `int, long long, float, double,...` should be explicitly initialised and *not* infered through the `auto` keyword. Initialisation should be performed via list initialisation *or* a static cast using `auto`. ie. it should be obvious by immediate observation what the precision is of all fundamental variables
-```c++
+```cpp
 auto i = 1;   //BAD! Not explicitly stating what i is
 auto j = 2.0; //BAD! Not explicitly stating the precision of the floating point
 
@@ -76,10 +76,9 @@ int n { 10000000 * 1000000 }; //ERROR braces pick up overflow, GOOD!
 * Unless *specifically* required for size, avoid the use of unsigned values, especially when used in `for` loops
 
 ### Strings
-
 Avoid the use of std::string whenever using read-only strings - prefer std::string_view for space and computational efficiency
 
-```c++
+```cpp
 auto print_string(std::string b) -> void {
 	std::cout << b;
 }
@@ -100,3 +99,122 @@ Use `std::map` and `std::set` only where required *and* where order matters. Alw
 
 
 ## Naming Convention
+Equal in importance only to comments, the consistency and clarity of naming conventions across classes, files and projects is the fundamental backbone of well written code. There are 2 pillars of naming conventions which should be adhered to at all times:
+* **Consistency**. Is the naming style common across all code, or is it eclectic and constantly changing? Choice of naming style is largely arbitrary - stick to the same style (this style) irrespective of individual preference
+* **Clarity**. All code should be self documenting by the word content of the names themselves. Variable, class, and function names should leave no uncertainty as to their meaning and intent to the next contributor
+
+Of particular note is that, with the existence of thousands of silicon valley coding standards, there is no such thing as a 'best' standard, only consistent standards. If a style is already clear, a better coding style is not one which boast a better use of capitals or underscores for greater coherence over their neighbours, but one which is absolutely reproducible and consistent
+
+After writing a function, declaring a class, or naming a variable, ask oneself if the name adheres to the style convention and, equally importantly, conveys the necessary meaning of the object. If not: rename immediately.
+
+### General Naming Rules
+* **Favour intuitive naming over file size.** The meaning of a variable's name is not worth sacrificing for a few bytes of character space. HDDs are cheap (and more importantly we programmers don't pay for it): avoid short and unclear names
+```cpp
+std::ifstream f("accounts.csv"); //BAD. f is obviously myfile here,
+								 //what if we refer to it later?
+
+std::ifstream accounts_f("accounts.csv"); //Better - obviously the accounts file
+
+//AN EXAMPLE FROM COMBUS CODE:
+//This function is very obscure in name - someone unsure of areaperils would not 
+//understand this. There is no directive or verb to the name and could genuinely perform several different functions
+double latitude_apid(long long qk) {
+...
+}
+
+//Better! In the previous function it is unclear what is being converted in what
+//direction. Less ambiguity here
+double apid_to_latitude(long long qk) {
+...
+}
+
+//Even BETTER! No ambiguity here, the function does exactly what it says: gets
+//the latitude from an areaperil
+double get_areaperil_latitude(long long qk) {
+...
+}
+```
+
+### Specific Notation
+Hungarian notation and other hyper-pedantic coding styles have been relegated into obscurity by abstract virtual programming and a general dislike for pedantry. There are, however, a few notable specific notation paradigms which occur frequently enough to elicit common naming features. These and other paradigms are covered below.
+
+### General Variable Conventions
+Variables names should contain no uppercases and be entirely lowercase (except in very specific circumstances where the capitals provide direct meaning). Names constituted by multiple words should have these words separated by an underscore.
+```cpp
+int num_world_tiles{50}; //Good
+std::string worldLocation; //Bad
+```
+
+### Functions
+Functions should contain no uppercases and be entirely lowercase (except in very specific circumstances where the capitals provide direct meaning). As with variables, an underscore differentiates multiple words in a name. Note this constrasts the google c++ standard which uses capitals to differentiate words. Prefer the trailing `auto` return type syntax for all functions. While potentially unfamiliar with new (or very old) C++ users, it's often easier to determine return types for complex templated functions
+```cpp
+auto foo(int x) -> int{...} //Use this
+int foo(int x){...} //Rather than this
+
+//often easier to read when the return type is on the right
+template<typename T, typename U>
+auto add(T& a, U& b) -> decltype(auto){
+	 return a + b; 
+}
+```
+
+### File Variables
+Variable names for `FILE*, std::ifstream, std::ofstream,etc..` should all be succeded with `_f`
+```cpp
+std::ifstream accounts_f {"accounts.csv"}; //good
+std::ifstream accounts {"accounts.csv"}; //bad
+``` 
+
+### Constants Constant variables should be preceded with a `k_`
+```cpp
+const int k_num_week_days { 7 };
+```
+
+### Classes and Structs
+Class and struct names should start with a capital and contain no underscores. For a class name containing several words, each new world should start with a capital letter. Class names should be clearly identify use and scope; avoid ambiguous names which do not convey a recognisable use and purpose. Minimise the use of abbreviations that would be unknown to someone outside of the immediate project.
+
+There are a number of important paradigms to follow when programming classes, some of these are best considered as good C++ practise transcending a specific coding style.
+* Avoid virtual methods in class constructors
+* Follow the rule of zero/three/five. First consider the rule of three which states that if any of a classes destructor, copy constructor or copy assignment are required, *all* three need to be defined. If a move operator is required, use the rule of five. This rule states that if any of a classes destructor, copy constructor, copy assignment, move constructor or move assignment are required, *all* five must be defined. 
+
+```cpp
+class MyClass{
+public:
+	//MyClass destructor and move constructor is defined
+	//the rule of 5 is then followed
+	~MyClass();
+	MyClass(const MyClass& a){}
+	MyClass(MyClass&& a){}
+	auto operator=(const MyClass& a) -> MyClass&{}
+	auto operator=(MyClass&& a) noexcept -> MyClass&{}
+}
+```
+
+* If the copy/move constructors/operators are undesired, ensure to explicitly delete them. When relevant for simple structures, use the default keyword
+```cpp
+class NoCopyClass{
+public:
+	~MyClass() = default
+	MyClass(const MyClass& a) = delete;
+	
+}
+```
+
+### Class and Struct Members
+Members of classes or structs should be succeded with an underscore `_`. The descriptiveness of a variable's name should be proportional to the variable's scope of visibility. As an example, calling a variable `n` or `i` is often acceptable in a 5 line for loop - within the scope of a class it is obscure.
+```cpp
+struct FootprintRecord{
+	int event_id_;
+	unsigned long long apid_;
+}; 
+
+class Animal{
+	...
+private:
+	std::string animal_name_;
+	//int n_; //BAD. n is obscure!
+	int age_; //BETTER, age is more obvious than n_
+};
+```
+### Macros
+Using macros in modern C++ is equivalent to using chisel and stone to write a quarterly report - its relevance has long past and there are unquestionably superior alternatives. There are few, if any, good reasons to use `#define` macros in C++, even fewer for COMBUS C++ projects. If macros are deemed necessary, name them in all caps and wrap any complex expressions in brackets to avoid unwanted arithmetic expansions 
