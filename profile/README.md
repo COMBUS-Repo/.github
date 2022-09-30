@@ -1,1 +1,1 @@
-Click [here](../COMBUS%20C%2B%2B%20Style%20Guide.md) for the COMBUS C++ style guide
+Click [here](COMBUS%20C%2B%2B%20Style%20Guide.md) for the COMBUS C++ style guide
