@@ -99,7 +99,7 @@ Use `std::map` and `std::set` only where required *and* where order matters. Alw
 
 
 ## Naming Convention
-Equal in importance only to comments, the consistency and clarity of naming conventions across classes, files and projects is the fundamental backbone of well written code. There are 2 pillars of naming conventions which should be adhered to at all times:
+Equal in importance to comments as the backbone of well written code is the naming conventions across classes, files, functions and variables. There are 2 pillars of naming conventions which should be adhered to at all times:
 * **Consistency**. Is the naming style common across all code, or is it eclectic and constantly changing? Choice of naming style is largely arbitrary - stick to the same style (this style) irrespective of individual preference
 * **Clarity**. All code should be self documenting by the word content of the names themselves. Variable, class, and function names should leave no uncertainty as to their meaning and intent to the next contributor
 
