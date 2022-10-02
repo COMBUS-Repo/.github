@@ -259,4 +259,4 @@ private:
  All global variables should have a comment describing their use and reason for being global
 
  ## General Formatting
- A .clang-format file is provided which manages formatting automatically. 
+ A .clang-format file is provided which manages formatting automatically. In visual studio, periodically use hotkeys `Cntrl-k, Cntrl-d` to perform an auto clang format. 
