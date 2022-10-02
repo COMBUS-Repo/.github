@@ -192,11 +192,11 @@ public:
 
 * If the copy/move constructors/operators are undesired, ensure to explicitly delete them. When relevant for simple structures, use the default keyword
 ```cpp
-class NoCopyClass{
+class NoCopyClassOnlyMove{
 public:
 	~MyClass() = default
 	MyClass(const MyClass& a) = delete;
-	
+	auto operator=(const MyClass& a) -> MyClass& = delete;
 }
 ```
 
@@ -216,5 +216,47 @@ private:
 	int age_; //BETTER, age is more obvious than n_
 };
 ```
+
+### OOP Rules
+General OOP rules should apply to all classes. The scope for these rules likely go beyond this guide; however, the SOLID principles are reiterated here for posterity:
+* **S**ingle responsibility principle - there should never be more than one reason for a class to change, that is, each class should only have one responsibility. Eg: Prefer a *FootprintWriter* and *FootprintReader* class to a joint FootprintFile class which reads and writes
+* **O**pen-closed principle - classes should be open to extension but closed to modification
+* **L**iskov substitution principle - functions that use pointers or references to base classes must be able to use objects of derived classes without knowing it
+* **I**nterface segregation principle - clients should not be forced to rely on interfaces they do not use
+* **D**ependency inversion principle - depend upon abstractions not concretions
+
 ### Macros
 Using macros in modern C++ is equivalent to using chisel and stone to write a quarterly report - its relevance has long past and there are unquestionably superior alternatives. There are few, if any, good reasons to use `#define` macros in C++, even fewer for COMBUS C++ projects. If macros are deemed necessary, name them in all caps and wrap any complex expressions in brackets to avoid unwanted arithmetic expansions 
+
+## Comments
+Comments, given sensibly written code containing consistent naming conventions, keep code readible, and provide longevity for developers and users alike long after the project is written. **REMEMBER**: the best code is self documenting! Comments should augment the meaning of classes, variables and functions not possible to be conveyed through naming conventions alone.
+
+### Comment Style
+Prefer `//` code blocks over `/**/`. Standard `//` blocks are far more common
+
+### Class Comments
+Start each class with a comment block explaining the purpose and scope of the code. If a file contains code for multiple abstractions, ie. a virtual class and its implementations, a block should be provided at the top of each interface. Note: prefer splitting all abstractions and implementations into their own files, combine only for very small classes. Class comments should also provide a simple example on how the class should be used, as well as describing any necessary assumptions.
+
+### Class Function Comments
+If the use of a function is not obvious (ie. get, set, etc...) place a comment above the function describing the operation. Almost every function should have a comment immediately preceding it descibing use and providing an example. A function comment should provide the following (if relevant): 
+* What the inputs and outputs are. If function argument names are provided in `backticks`, then code-indexing tools may be able to present the documentation better.
+* For class member functions: whether the object remembers reference or pointer arguments beyond the duration of the method call. This is quite common for pointer/reference arguments to constructors.
+* For each pointer argument, whether it is allowed to be null and what happens if it is.
+* For each output or input/output argument, what happens to any state that argument is in. (E.g. is the state appended to or overwritten?).
+* If there are any performance implications of how a function is used.
+
+### Class Variable Comments
+In general, a variable name should provide enough information about its purpose. In cases where this is not immediately obvious, provide comments describing its use. 
+In particular, add comments to describe the existence and meaning of sentinel values, such as nullptr or -1, when they are not obvious. For example:
+```cpp
+private:
+ // Used to bounds-check table accesses. -1 means
+ // that we don't yet know how many entries the table has.
+ int num_total_entries_;
+ ```
+
+ ### Global Variables
+ All global variables should have a comment describing their use and reason for being global
+
+ ## General Formatting
+ A .clang-format file is provided which manages formatting automatically. 
